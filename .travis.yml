@@ -1,0 +1,24 @@
+language: php
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+services:
+  - redis
+
+before_script:
+  - composer self-update
+
+install:
+  - echo "extension = redis.so" > redis.ini
+  - phpenv config-add redis.ini
+  - composer install
+
+script:
+  - ./vendor/bin/phpunit
