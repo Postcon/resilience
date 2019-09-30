@@ -5,7 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $redis = new \Redis();
 $redis->connect('redis', 6379);
 
-$circuitBreaker = new \Postcon\Resilience\RedisCircuitBreaker($redis, 'system');
+$circuitBreaker = new \Postcon\Resilience\RedisCircuitBreaker($redis, 'system', 120, 3);
 $circuitBreaker->reportSuccess();
 
 $circuitBreaker->isAvailable(); // should be true

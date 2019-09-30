@@ -1,5 +1,7 @@
 # Resilience library
 
+[![Build Status](https://secure.travis-ci.org/DrSchimke/resilience.png)](http://travis-ci.org/DrSchimke/resilience)
+
 A collection of reusable resilience pattern implementations. Currently implemented:
 
 * [circuit breaker](https://martinfowler.com/bliki/CircuitBreaker.html)
@@ -17,7 +19,7 @@ composer require postcon/resilience
 ```php
 $redis = new \Redis();
 
-$circuitBreaker = new \Postcon\Resilience\RedisCircuitBreaker($redis, 'system');
+$circuitBreaker = new \Postcon\Resilience\RedisCircuitBreaker($redis, 'system', 120, 3);
 $circuitBreaker->reportSuccess();
 
 $circuitBreaker->isAvailable(); // should be true
@@ -31,19 +33,25 @@ $circuitBreaker->isAvailable(); // ... now it is false
 $circuitBreaker->check(); // throws CircuitBreakerTripped exception, if 'system' is not available.
 ```
 
-```
+## State transitions
 
- --------------------------     ::reportSuccess()       ---------------------------
-|            CLOSED        |  <--------------------    |            OPEN           |
-| ::isAvailable() === true |    exceeding lifetime     | ::isAvailable() === false |
- --------------------------                             ---------------------------
-     ^                                                                    ^
-     |                                                                    |
-     |                                                                    |
-     |                    --------------------------    ::reportFailure() |
-      ------------------ |         HALF OPEN        | ---------------------
-      ::reportSuccess()  | ::isAvailable() === true |
-                          --------------------------
+The circuit breaker can be on one of three states: CLOSED (system is available), HALF OPEN (system is still available)
+and OPEN (system is not available).
+
+```
+ --------------------------      ::reportSuccess()        ---------------------------
+|          CLOSED          | <-------------------------- |            OPEN           |
+| ::isAvailable() === true |    exceeding lifetime       | ::isAvailable() === false |
+ --------------------------                               ---------------------------
+       ^      |                                                                 ^
+       |      |   ::reportFailure()                                             |
+       |       -------------------------                                        |
+       |                                |                                       |
+       |                                v                                       |
+       |  ::reportSuccess()   --------------------------                        |
+        -------------------- |         HALF OPEN        | ----------------------
+         exceeding lifetime  | ::isAvailable() === true |  rpt. ::reportFailure()
+                              --------------------------
 ```
 
 
