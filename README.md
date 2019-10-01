@@ -38,6 +38,14 @@ $circuitBreaker->check(); // throws CircuitBreakerTripped exception, if 'system'
 The circuit breaker can be on one of three states: CLOSED (system is available), HALF OPEN (system is still available)
 and OPEN (system is not available).
 
+The _normal_ state of the circuit breaker is CLOSED; i.e. the system is working correctly. If a failure is reported,
+the state changes to HALF OPEN. If either a success is reported, or a defined time exceeds (_lifetime_), the state
+becomes CLOSED again. If failure is reported repeatedly (_maxErrors_), the state changes from HALF OPEN to OPEN
+(_the circuit breaker is tripped_).
+
+The OPEN state changes back to CLOSED, after exceeding a defined time. Depending on the usage of this circuit breaker
+implementation, a reported success could change the OPEN state to be CLOSED as well.
+
 ```
  --------------------------      ::reportSuccess()        ---------------------------
 |          CLOSED          | <-------------------------- |            OPEN           |
@@ -124,6 +132,14 @@ class CircuitBreakerClientDecorator implements ClientInterface
     }
 }
 ```
+
+## Implementation details
+
+Currently, there is a [redis](https://redis.io/) [implementation](lib/RedisCircuitBreaker.php) of the circuit
+breaker pattern. An instance of a circuit breaker is persisted as the respective failure counter, where the redis key
+is the circuit breaker name.
+
+To implement the lifetime feature (automatic state transition to CLOSED after some time), the redis [EXPIRE command](https://redis.io/commands/expire) is used.
 
 ## License
 
