@@ -9,7 +9,7 @@ use Postcon\Resilience\Exceptions\CircuitBreakerTripped;
 
 abstract class AbstractCircuitBreakerTest extends TestCase
 {
-    protected const NAME       = 'system to be circuit-breaked';
+    protected const NAME       = 'system to be circuit-broken';
     protected const LIFE_TIME  = 2;
     protected const MAX_ERRORS = 3;
 

@@ -15,9 +15,11 @@ class AbstractCircuitBreakerTest extends TestCase
     {
         $circuitBreaker = $this->createCircuitBreaker('system', true);
 
-        self::assertTrue($circuitBreaker->isAvailable(), 'pre_condition');
+        self::assertTrue($circuitBreaker->isAvailable(), 'pre-condition');
 
         $circuitBreaker->check();
+
+        self::assertTrue(true);
     }
 
     /** @test */
@@ -28,15 +30,14 @@ class AbstractCircuitBreakerTest extends TestCase
 
         $circuitBreaker = $this->createCircuitBreaker('system', false);
 
-        self::assertFalse($circuitBreaker->isAvailable(), 'pre_condition');
+        self::assertFalse($circuitBreaker->isAvailable(), 'pre-condition');
 
         $circuitBreaker->check();
     }
 
     private function createCircuitBreaker(string $name, bool $availability): CircuitBreakerInterface
     {
-        $circuitBreaker = new class($name, $availability) extends AbstractCircuitBreaker
-        {
+        $circuitBreaker = new class($name, $availability) extends AbstractCircuitBreaker {
             private $name;
             private $availability;
 
@@ -57,12 +58,10 @@ class AbstractCircuitBreakerTest extends TestCase
             }
 
             public function reportSuccess(): void
-            {
-            }
+            {}
 
             public function reportFailure(): void
-            {
-            }
+            {}
         };
 
         return $circuitBreaker;
