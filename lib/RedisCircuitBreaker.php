@@ -11,6 +11,9 @@ class RedisCircuitBreaker extends AbstractCircuitBreaker
     /** @var string */
     private $name;
 
+    /** @var string */
+    private $key;
+
     /** @var int */
     private $lifetime;
 
@@ -21,24 +24,25 @@ class RedisCircuitBreaker extends AbstractCircuitBreaker
     {
         $this->redis     = $redis;
         $this->name      = $name;
+        $this->key       = sprintf('[%s]:%s', __CLASS__, $name);
         $this->lifetime  = $lifetime;
         $this->maxErrors = $maxErrors;
     }
 
     public function isAvailable(): bool
     {
-        return $this->redis->get($this->name) < $this->maxErrors;
+        return $this->redis->get($this->key) < $this->maxErrors;
     }
 
     public function reportSuccess(): void
     {
-        $this->redis->del($this->name);
+        $this->redis->del($this->key);
     }
 
     public function reportFailure(): void
     {
-        $this->redis->incr($this->name);
-        $this->redis->expire($this->name, $this->lifetime);
+        $this->redis->incr($this->key);
+        $this->redis->expire($this->key, $this->lifetime);
     }
 
     public function __toString(): string
